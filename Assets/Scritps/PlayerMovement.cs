@@ -54,7 +54,7 @@ public class PlayerMovement : MonoBehaviour
                 audioSource.Play();
             }
         }
-
+        
         //funcion de movimiento entre mirar arriba y mirar abajo
         transform.rotation = Quaternion.Lerp(transform.rotation, downRotation, Time.deltaTime * smooth);
     }
@@ -67,6 +67,9 @@ public class PlayerMovement : MonoBehaviour
             //Audio de que se mata
             audioSource.clip = dieClip;
             audioSource.Play();
+
+            //Para la gravedad al morir
+            rigidbody2.simulated = false;
 
             //Activo el evento OnPlayerDie si no es nulo
             if (OnPlayerDie != null) OnPlayerDie();
