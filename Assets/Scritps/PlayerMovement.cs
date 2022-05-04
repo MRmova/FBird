@@ -12,6 +12,7 @@ public class PlayerMovement : MonoBehaviour
 
     [SerializeField] float force;
     Rigidbody2D rigidbody2;
+    bool playerMove = false;
 
     [SerializeField] Vector3 upRotation;
     [SerializeField] Quaternion downRotation;
@@ -30,33 +31,37 @@ public class PlayerMovement : MonoBehaviour
         rigidbody2 = GetComponent<Rigidbody2D>();
         //Obetner la referencia del componente audioSource
         audioSource = GetComponent<AudioSource>();
+        //Desactivamos las fisicas para que no caiga mientras empieza el juego
+        rigidbody2.simulated = false;
     }
 
     // Update is called once per frame
     void Update()
     {
-        //compruebo si el usuario toco la pantalla
-        if (Input.touchCount > 0)
+        //Comprobamos si puede empezar a moverse
+        if (playerMove)
         {
-            Touch touch = Input.GetTouch(0);
-
-            if (touch.phase == TouchPhase.Began)
+            //compruebo si el usuario toco la pantalla
+            if (Input.touchCount > 0)
             {
-                //Elimino toda velocidad que estubiera aplicandosele
-                rigidbody2.velocity = Vector2.zero;
-                //Le añado la fuerza hacia arriba para su movimiento
-                rigidbody2.AddForce(Vector2.up * force, ForceMode2D.Impulse);
-                //Rotar la cabeza hacia arriba
-                //transform.rotation = upRotation;
-                transform.eulerAngles = upRotation;
-                //Play audio
-                audioSource.clip = jumpClip;
-                audioSource.Play();
+                Touch touch = Input.GetTouch(0);
+                if (touch.phase == TouchPhase.Began)
+                {
+                    //Elimino toda velocidad que estubiera aplicandosele
+                    rigidbody2.velocity = Vector2.zero;
+                    //Le añado la fuerza hacia arriba para su movimiento
+                    rigidbody2.AddForce(Vector2.up * force, ForceMode2D.Impulse);
+                    //Rotar la cabeza hacia arriba
+                    //transform.rotation = upRotation;
+                    transform.eulerAngles = upRotation;
+                    //Play audio
+                    audioSource.clip = jumpClip;
+                    audioSource.Play();
+                }
             }
+            //funcion de movimiento entre mirar arriba y mirar abajo
+            transform.rotation = Quaternion.Lerp(transform.rotation, downRotation, Time.deltaTime * smooth);
         }
-        
-        //funcion de movimiento entre mirar arriba y mirar abajo
-        transform.rotation = Quaternion.Lerp(transform.rotation, downRotation, Time.deltaTime * smooth);
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -74,5 +79,19 @@ public class PlayerMovement : MonoBehaviour
             //Activo el evento OnPlayerDie si no es nulo
             if (OnPlayerDie != null) OnPlayerDie();
         }
+    }
+
+    private void Awake()
+    {
+        //Altavox -> GameManager.OnGameStart
+        //Micro -> OnGameStartPlayer
+        //Suscripcion a un evento
+        GameManager.OnGameStart += OnGameStartPlayer;
+    }
+
+    void OnGameStartPlayer()
+    {
+        rigidbody2.simulated = true;
+        playerMove = true;
     }
 }
