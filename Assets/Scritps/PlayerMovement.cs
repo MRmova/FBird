@@ -16,7 +16,7 @@ public class PlayerMovement : MonoBehaviour
 
     [SerializeField] Vector3 upRotation;
     [SerializeField] Quaternion downRotation;
-    public float smooth;
+    [SerializeField] public float smooth;
 
     [SerializeField] AudioClip jumpClip;
     [SerializeField] AudioClip dieClip;
@@ -45,6 +45,7 @@ public class PlayerMovement : MonoBehaviour
             if (Input.touchCount > 0)
             {
                 Touch touch = Input.GetTouch(0);
+
                 if (touch.phase == TouchPhase.Began)
                 {
                     //Elimino toda velocidad que estubiera aplicandosele
@@ -87,11 +88,26 @@ public class PlayerMovement : MonoBehaviour
         //Micro -> OnGameStartPlayer
         //Suscripcion a un evento
         GameManager.OnGameStart += OnGameStartPlayer;
+        GameManager.OnGameOver += OnGameOverPlayer;
+        GameManager.OnGameReStart += OnGameReStartPlayer;
     }
 
     void OnGameStartPlayer()
     {
         rigidbody2.simulated = true;
         playerMove = true;
+    }
+
+    void OnGameOverPlayer()
+    {
+        playerMove = false;
+    }
+
+    void OnGameReStartPlayer()
+    {
+        transform.position = Vector3.zero;
+        transform.rotation = Quaternion.identity;
+        playerMove = false;
+        rigidbody2.velocity = Vector2.zero;
     }
 }

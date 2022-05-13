@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class GameManager : MonoBehaviour
 {
     // Variables
-    //Eventos
+    // Eventos
     public delegate void GameDelegate();
     public static event GameDelegate OnGameOver;
     public static event GameDelegate OnGameStart;
@@ -24,6 +24,12 @@ public class GameManager : MonoBehaviour
     int score = 0;
 
     //Funciones
+
+    private void Awake()
+    {
+        PlayerMovement.OnPlayerDie += OnPlayerDieGameManager;
+
+    }
     public void StartGame()
     {
         //Desactivar el panel de start
@@ -32,8 +38,20 @@ public class GameManager : MonoBehaviour
         countDownPanel.SetActive(true);
         //Lanzar la cuenta atras
         StartCoroutine(CountDown());
+    }
 
+    private void OnDisable()
+    {
+        PlayerMovement.OnPlayerDie -= OnPlayerDieGameManager;
+    }
 
+    void OnPlayerDieGameManager()
+    {
+        //Disparar eevento OnGameOver
+        if (OnGameOver != null) OnGameOver();
+
+        //Gestion del UI
+        gameOverPanel.SetActive(true);
     }
 
     //Corutina para gestionar la cuenta atras
@@ -53,5 +71,14 @@ public class GameManager : MonoBehaviour
         countDownPanel.SetActive(false);
         //Generamos evento de que el juego empieza
         if (OnGameStart != null) OnGameStart();
+    }
+
+    // Función para reiniciar el juegos tras un evento de GameOver
+    public void ReStart()
+    {
+        gameOverPanel.SetActive(false);
+        startPanel.SetActive(true);
+
+        if (OnGameReStart != null) OnGameReStart();
     }
 }
